@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+  nginx:
+    container_name: nginx
+    depends_on:
+      - wordpress
+    build:
+      context: ./nginx
+      dockerfile: dockerfile.nginx
+    networks:
+      - web-server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - wp_data:/var/www/html
+    restart: always
+
+  wordpress:
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    build:
+      context: ./wordpress
+      dockerfile: dockerfile.wordpress
+    expose:
+      - "9000"
+    networks:
+      - database
+      - web-server
+    volumes:
+      - wp_data:/var/www/html
+    env_file:
+      - .env
+    restart: always
+
+  mariadb:
+    container_name: mariadb
+    build:
+      context: ./mariadb
+      dockerfile: dockerfile.mariadb
+    expose:
+      - "3306"
+    networks:
+      - database
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file:
+      - .env
+    restart: always
+
+networks:
+  web-server:
+  database:
+
+volumes:
+  wp_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/flahoud/data/wp_data
+  db_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/flahoud/data/db_data
+    

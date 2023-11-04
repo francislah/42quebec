@@ -1,0 +1,11 @@
+FROM debian:10
+
+RUN apt-get update && apt-get install -y nginx openssl
+
+# Generate private key and self-signed SSL certificate
+WORKDIR /etc/nginx/ssl/
+RUN openssl req -newkey rsa:2048 -nodes -keyout private.key -x509 -days 365 -out certificate.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+CMD ["nginx", "-g", "daemon off;"]
